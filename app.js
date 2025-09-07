@@ -2,19 +2,21 @@
 // Primary paths assume: img/animals/1-5.png, img/vehicles/1-5.png
 // Fallbacks map to sample images found under docs/img/transparent_1-10.png
 const MANIFEST = {
-  animals: [
-    ["img/animals/1.png", "docs/img/transparent_1.png"],
-    ["img/animals/2.png", "docs/img/transparent_2.png"],
-    ["img/animals/3.png", "docs/img/transparent_3.png"],
-    ["img/animals/4.png", "docs/img/transparent_4.png"],
-    ["img/animals/5.png", "docs/img/transparent_5.png"],
+  fairy: [
+    ["img/01_fairy/01.png"],
+    ["img/01_fairy/02.png"],
+    ["img/01_fairy/03.png"],
   ],
-  vehicles: [
-    ["img/vehicles/1.png", "docs/img/transparent_6.png"],
-    ["img/vehicles/2.png", "docs/img/transparent_7.png"],
-    ["img/vehicles/3.png", "docs/img/transparent_8.png"],
-    ["img/vehicles/4.png", "docs/img/transparent_9.png"],
-    ["img/vehicles/5.png", "docs/img/transparent_10.png"],
+  car: [
+    ["img/02_car/01.png"],
+    ["img/02_car/02.png"],
+    ["img/02_car/03.png"],
+    ["img/02_car/04.png"],
+  ],
+  ninja: [
+    ["img/03_ninja/010.png"],
+    ["img/03_ninja/020.png"],
+    ["img/03_ninja/040.png"],
   ],
 };
 
@@ -22,7 +24,7 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const state = {
-  category: "animals",
+  category: "fairy",
   index: 0,
   tool: "brush", // 'brush' | 'eraser'
   color: "#ff6b6b",
