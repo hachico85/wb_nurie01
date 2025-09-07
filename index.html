@@ -14,53 +14,83 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <h1 class="app-title">ぬりえ</h1>
-      <nav class="tabs" role="tablist" aria-label="カテゴリ">
-        <button class="tab active" data-category="fairy" aria-selected="true">妖精</button>
-        <button class="tab" data-category="car" aria-selected="false">車</button>
-        <button class="tab" data-category="ninja" aria-selected="false">忍者</button>
-      </nav>
-      <div class="spacer"></div>
-      <div class="tools">
-        <label class="tool">
-          <span>色</span>
-          <input id="colorPicker" type="color" value="#ff6b6b" />
-        </label>
-        <div id="palette" class="palette" role="group" aria-label="基本色"></div>
-        <label class="tool">
-          <span>太さ</span>
-          <input id="brushSize" type="range" min="2" max="60" value="22" />
-        </label>
-        <div class="buttons">
-          <button id="brushBtn" class="primary" aria-pressed="true">筆</button>
-          <button id="eraserBtn" aria-pressed="false">消しゴム</button>
-          <button id="clearBtn">クリア</button>
-          <button id="thumbToggle" title="サムネイル">一覧</button>
+    <!-- メニュー画面 -->
+    <div id="menuScreen" class="menu-screen">
+      <header class="menu-header">
+        <h1 class="menu-title">ぬりえを選んでね</h1>
+      </header>
+      <main class="menu-content">
+        <div class="category-grid">
+          <button class="category-card" data-category="fairy">
+            <div class="category-icon">🧚‍♀️</div>
+            <h2 class="category-title">メルヘン</h2>
+            <p class="category-description">妖精や魔法の世界</p>
+          </button>
+          <button class="category-card" data-category="car">
+            <div class="category-icon">🚗</div>
+            <h2 class="category-title">乗り物</h2>
+            <p class="category-description">車やバイクなど</p>
+          </button>
+          <button class="category-card" data-category="ninja">
+            <div class="category-icon">🥷</div>
+            <h2 class="category-title">忍者</h2>
+            <p class="category-description">忍者の世界</p>
+          </button>
         </div>
-      </div>
-    </header>
+      </main>
+    </div>
 
-    <main class="main">
-      <section class="stage">
-        <div id="canvasWrap" class="canvas-wrap">
-          <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
-          <canvas id="lineArtLayer" class="canvas-layer" aria-label="線画レイヤー"></canvas>
-          <div class="nav-arrows">
-            <button id="prevBtn" aria-label="前へ" class="nav-btn">◀</button>
-            <button id="nextBtn" aria-label="次へ" class="nav-btn">▶</button>
+    <!-- 塗り絵画面 -->
+    <div id="paintScreen" class="paint-screen" style="display: none;">
+      <header class="topbar">
+        <button id="backToMenu" class="back-btn">← メニュー</button>
+        <h1 class="app-title">ぬりえ</h1>
+        <nav class="tabs" role="tablist" aria-label="カテゴリ">
+          <button class="tab active" data-category="fairy" aria-selected="true">メルヘン</button>
+          <button class="tab" data-category="car" aria-selected="false">乗り物</button>
+          <button class="tab" data-category="ninja" aria-selected="false">忍者</button>
+        </nav>
+        <div class="spacer"></div>
+        <div class="tools">
+          <label class="tool">
+            <span>色</span>
+            <input id="colorPicker" type="color" value="#ff6b6b" />
+          </label>
+          <div id="palette" class="palette" role="group" aria-label="基本色"></div>
+          <label class="tool">
+            <span>太さ</span>
+            <input id="brushSize" type="range" min="2" max="60" value="22" />
+          </label>
+          <div class="buttons">
+            <button id="brushBtn" class="primary" aria-pressed="true">筆</button>
+            <button id="eraserBtn" aria-pressed="false">消しゴム</button>
+            <button id="clearBtn">クリア</button>
+            <button id="thumbToggle" title="サムネイル">一覧</button>
           </div>
         </div>
-      </section>
+      </header>
 
-      <aside id="thumbDrawer" class="drawer" aria-hidden="true">
-        <div class="drawer-header">
-          <strong>サムネイル</strong>
-          <button id="drawerClose" aria-label="閉じる">×</button>
-        </div>
-        <div id="thumbGrid" class="thumb-grid" role="list"></div>
-      </aside>
-    </main>
+      <main class="main">
+        <section class="stage">
+          <div id="canvasWrap" class="canvas-wrap">
+            <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
+            <canvas id="lineArtLayer" class="canvas-layer" aria-label="線画レイヤー"></canvas>
+            <div class="nav-arrows">
+              <button id="prevBtn" aria-label="前へ" class="nav-btn">◀</button>
+              <button id="nextBtn" aria-label="次へ" class="nav-btn">▶</button>
+            </div>
+          </div>
+        </section>
+
+        <aside id="thumbDrawer" class="drawer" aria-hidden="true">
+          <div class="drawer-header">
+            <strong>サムネイル</strong>
+            <button id="drawerClose" aria-label="閉じる">×</button>
+          </div>
+          <div id="thumbGrid" class="thumb-grid" role="list"></div>
+        </aside>
+      </main>
+    </div>
 
     <script src="app.js" type="module"></script>
     

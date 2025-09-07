@@ -37,7 +37,124 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hira
 .thumb.active { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
 .thumb img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
+/* メニュー画面のスタイル */
+.menu-screen {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-header {
+  text-align: center;
+  padding: 40px 20px 20px;
+}
+
+.menu-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.menu-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.category-card {
+  background: white;
+  border: none;
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.category-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.category-card:active {
+  transform: translateY(-5px);
+}
+
+.category-icon {
+  font-size: 80px;
+  line-height: 1;
+}
+
+.category-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.category-description {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* 戻るボタン */
+.back-btn {
+  border: none;
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 12px;
+}
+
+.back-btn:hover {
+  background: #2563eb;
+}
+
 @media (max-width: 680px) {
   .tools { flex-wrap: wrap; }
   .canvas-wrap { height: min(60vh, 640px); }
+  
+  .menu-title {
+    font-size: 24px;
+  }
+  
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 350px;
+  }
+  
+  .category-card {
+    padding: 30px 20px;
+  }
+  
+  .category-icon {
+    font-size: 60px;
+  }
+  
+  .category-title {
+    font-size: 24px;
+  }
 }
