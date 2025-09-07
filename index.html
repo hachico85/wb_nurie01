@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="塗り絵WEBアプリ - PC・iPad・iPhone対応" />
+    <title>塗り絵WEBアプリ</title>
+    
+    <!-- PWA対応 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+    
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1 class="app-title">ぬりえ</h1>
+      <nav class="tabs" role="tablist" aria-label="カテゴリ">
+        <button class="tab active" data-category="animals" aria-selected="true">動物</button>
+        <button class="tab" data-category="vehicles" aria-selected="false">のりもの</button>
+      </nav>
+      <div class="spacer"></div>
+      <div class="tools">
+        <label class="tool">
+          <span>色</span>
+          <input id="colorPicker" type="color" value="#ff6b6b" />
+        </label>
+        <div id="palette" class="palette" role="group" aria-label="基本色"></div>
+        <label class="tool">
+          <span>太さ</span>
+          <input id="brushSize" type="range" min="2" max="60" value="22" />
+        </label>
+        <div class="buttons">
+          <button id="brushBtn" class="primary" aria-pressed="true">筆</button>
+          <button id="eraserBtn" aria-pressed="false">消しゴム</button>
+          <button id="clearBtn">クリア</button>
+          <button id="thumbToggle" title="サムネイル">一覧</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="stage">
+        <div id="canvasWrap" class="canvas-wrap">
+          <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
+          <canvas id="lineArtLayer" class="canvas-layer" aria-label="線画レイヤー"></canvas>
+          <div class="nav-arrows">
+            <button id="prevBtn" aria-label="前へ" class="nav-btn">◀</button>
+            <button id="nextBtn" aria-label="次へ" class="nav-btn">▶</button>
+          </div>
+        </div>
+      </section>
+
+      <aside id="thumbDrawer" class="drawer" aria-hidden="true">
+        <div class="drawer-header">
+          <strong>サムネイル</strong>
+          <button id="drawerClose" aria-label="閉じる">×</button>
+        </div>
+        <div id="thumbGrid" class="thumb-grid" role="list"></div>
+      </aside>
+    </main>
+
+    <script src="app.js" type="module"></script>
+    
+    <!-- Service Worker登録 -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+  </html>
