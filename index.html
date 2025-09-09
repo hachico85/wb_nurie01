@@ -6,10 +6,10 @@
     <meta name="description" content="塗り絵WEBアプリ - PC・iPad・iPhone対応" />
     <title>塗り絵WEBアプリ</title>
     
-    <!-- PWA対応 -->
-    <link rel="manifest" href="manifest.json" />
+    <!-- PWA対応（アイコン一時無効化） -->
+    <!-- <link rel="manifest" href="manifest.json" /> -->
     <meta name="theme-color" content="#ffffff" />
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+    <!-- <link rel="apple-touch-icon" href="icons/icon-192x192.png" /> -->
     
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -44,8 +44,8 @@
     <main class="main">
       <section class="stage">
         <div id="canvasWrap" class="canvas-wrap">
-          <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
           <canvas id="lineArtLayer" class="canvas-layer" aria-label="線画レイヤー"></canvas>
+          <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
           <div class="nav-arrows">
             <button id="prevBtn" aria-label="前へ" class="nav-btn">◀</button>
             <button id="nextBtn" aria-label="次へ" class="nav-btn">▶</button>
@@ -64,7 +64,8 @@
 
     <script src="app.js" type="module"></script>
     
-    <!-- Service Worker登録 -->
+    <!-- Service Worker登録（一時無効化） -->
+    <!--
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -78,5 +79,6 @@
         });
       }
     </script>
+    -->
   </body>
   </html>

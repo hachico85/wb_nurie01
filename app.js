@@ -3,20 +3,19 @@
 // Fallbacks map to sample images found under docs/img/transparent_1-10.png
 const MANIFEST = {
   fairy: [
-    ["img/01_fairy/01.png"],
-    ["img/01_fairy/02.png"],
-    ["img/01_fairy/03.png"],
+    "img/01_fairy/01.png",
+    "img/01_fairy/02.png",
+    "img/01_fairy/03.png",
   ],
   car: [
-    ["img/02_car/01.png"],
-    ["img/02_car/02.png"],
-    ["img/02_car/03.png"],
-    ["img/02_car/04.png"],
+    "img/02_car/01.png",
+    "img/02_car/02.png",
+    "img/02_car/03.png",
   ],
   ninja: [
-    ["img/03_ninja/010.png"],
-    ["img/03_ninja/020.png"],
-    ["img/03_ninja/040.png"],
+    "img/03_ninja/01.png",
+    "img/03_ninja/02.png",
+    "img/03_ninja/03.png",
   ],
 };
 
@@ -52,32 +51,28 @@ const prevBtn = $("#prevBtn");
 const nextBtn = $("#nextBtn");
 const paletteEl = $("#palette");
 
-// Resolve image path by trying candidates in order, returning first that loads
-async function resolveImage(candidates) {
-  for (const url of candidates) {
-    try {
-      await new Promise((res, rej) => {
-        const img = new Image();
-        img.onload = () => res();
-        img.onerror = rej;
-        img.src = url;
-      });
-      return url;
-    } catch (_) {
-      // try next
-    }
+// Simple image loading
+async function resolveImage(url) {
+  try {
+    await new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res();
+      img.onerror = rej;
+      img.src = url;
+    });
+    return url;
+  } catch (_) {
+    console.error('Failed to load image:', url);
+    throw new Error(`Failed to load image: ${url}`);
   }
-  // If all fail, just return first (browser will show broken img)
-  return candidates[0];
 }
 
 // Build thumbnail grid
 async function renderThumbs() {
   thumbGrid.innerHTML = "";
   const list = MANIFEST[state.category];
-  const resolved = await Promise.all(list.map(resolveImage));
 
-  resolved.forEach((url, i) => {
+  list.forEach((url, i) => {
     const item = document.createElement("button");
     item.className = "thumb" + (i === state.index ? " active" : "");
     item.setAttribute("role", "listitem");
@@ -108,8 +103,8 @@ async function loadPage(category, index) {
   // Thumb highlight
   $$(".thumb").forEach((el, i) => el.classList.toggle("active", i === index));
 
-  const candidates = MANIFEST[category][index];
-  const url = await resolveImage(candidates);
+  const url = MANIFEST[category][index];
+  await resolveImage(url);
 
   // Save current paint before switching
   const keyPrev = lineArtCanvas.dataset.resolvedUrl;
@@ -164,6 +159,13 @@ function fitToWrap(img) {
     canvas.style.width = w + "px";
     canvas.style.height = h + "px";
   });
+  
+  // Re-initialize paint context after canvas resize
+  paintCtx.lineJoin = "round";
+  paintCtx.lineCap = "round";
+  paintCtx.lineWidth = state.size;
+  paintCtx.strokeStyle = state.color;
+  paintCtx.globalCompositeOperation = "source-over";
 }
 
 function saveCurrentPaint(key) {
@@ -251,6 +253,13 @@ function handlePointerUp(e) {
 function preventDefault(e) { e.preventDefault(); }
 
 function bindCanvasEvents() {
+  if (!paintCanvas) {
+    console.error("paintCanvas is null!");
+    return;
+  }
+  
+  
+  // Use pointer events only
   paintCanvas.addEventListener("pointerdown", handlePointerDown);
   paintCanvas.addEventListener("pointermove", handlePointerMove);
   window.addEventListener("pointerup", handlePointerUp);
@@ -395,6 +404,9 @@ async function init() {
 }
 
 init().catch((e) => {
-  console.error(e);
-  alert("初期化に失敗しました: " + e);
+  console.error('Initialization error:', e);
+  console.error('Error type:', typeof e);
+  console.error('Error message:', e.message);
+  console.error('Error stack:', e.stack);
+  alert("初期化に失敗しました: " + (e.message || e.toString()));
 });
