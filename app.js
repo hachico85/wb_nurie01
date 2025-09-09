@@ -11,12 +11,11 @@ const MANIFEST = {
     "img/02_car/01.png",
     "img/02_car/02.png",
     "img/02_car/03.png",
-    "img/02_car/04.png",
   ],
   ninja: [
-    "img/03_ninja/010.png",
-    "img/03_ninja/020.png",
-    "img/03_ninja/040.png",
+    "img/03_ninja/01.png",
+    "img/03_ninja/02.png",
+    "img/03_ninja/03.png",
   ],
 };
 
