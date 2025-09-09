@@ -33,10 +33,6 @@ const state = {
   paints: new Map(), // key: resolvedURL, value: ImageData
 };
 
-// 画面要素の取得
-const menuScreen = $("#menuScreen");
-const paintScreen = $("#paintScreen");
-
 const paintCanvas = $("#paintLayer");
 const paintCtx = paintCanvas.getContext("2d");
 const lineArtCanvas = $("#lineArtLayer");
@@ -55,7 +51,6 @@ const thumbGrid = $("#thumbGrid");
 const prevBtn = $("#prevBtn");
 const nextBtn = $("#nextBtn");
 const paletteEl = $("#palette");
-const backToMenuBtn = $("#backToMenu");
 
 // Resolve image path by trying candidates in order, returning first that loads
 async function resolveImage(candidates) {
@@ -335,31 +330,8 @@ function selectColor(hex, fromPalette = false) {
   updatePaletteSelection();
 }
 
-// 画面切り替え機能
-function showMenuScreen() {
-  menuScreen.style.display = "flex";
-  paintScreen.style.display = "none";
-}
-
-function showPaintScreen(category) {
-  menuScreen.style.display = "none";
-  paintScreen.style.display = "block";
-  if (category && state.category !== category) {
-    loadPage(category, 0);
-  }
-}
-
 // UI bindings
 function bindUI() {
-  // カテゴリカード（メニュー画面）
-  $$(".category-card").forEach((card) => card.addEventListener("click", () => {
-    const category = card.dataset.category;
-    showPaintScreen(category);
-  }));
-
-  // 戻るボタン
-  backToMenuBtn.addEventListener("click", showMenuScreen);
-
   // Tabs
   $$(".tab").forEach((btn) => btn.addEventListener("click", async () => {
     const cat = btn.dataset.category;
@@ -418,8 +390,8 @@ async function init() {
   renderPalette();
   updatePaletteSelection();
   setTool("brush");
-  // 最初はメニュー画面を表示
-  showMenuScreen();
+  await renderThumbs();
+  await loadPage(state.category, state.index);
 }
 
 init().catch((e) => {
