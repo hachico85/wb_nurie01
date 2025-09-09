@@ -23,6 +23,7 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const state = {
+  currentScreen: "menu", // 'menu' | 'thumbs' | 'paint'
   category: "fairy",
   index: 0,
   tool: "brush", // 'brush' | 'eraser'
@@ -32,24 +33,93 @@ const state = {
   paints: new Map(), // key: resolvedURL, value: ImageData
 };
 
-const paintCanvas = $("#paintLayer");
-const paintCtx = paintCanvas.getContext("2d");
-const lineArtCanvas = $("#lineArtLayer");
-const lineArtCtx = lineArtCanvas.getContext("2d");
-const wrap = $("#canvasWrap");
+// Initialize elements after DOM is loaded
+let paintCanvas, paintCtx, lineArtCanvas, lineArtCtx, wrap;
+let menuScreen, thumbScreen, paintScreen;
+let categoryBtns;
+let backToMenu, thumbTitle, thumbGrid;
+let backToThumbs, paintTitle, prevPaintBtn, nextPaintBtn;
+let colorPicker, brushSize, brushBtn, eraserBtn, clearBtn, paletteEl;
 
-const colorPicker = $("#colorPicker");
-const brushSize = $("#brushSize");
-const brushBtn = $("#brushBtn");
-const eraserBtn = $("#eraserBtn");
-const clearBtn = $("#clearBtn");
-const thumbToggle = $("#thumbToggle");
-const thumbDrawer = $("#thumbDrawer");
-const drawerClose = $("#drawerClose");
-const thumbGrid = $("#thumbGrid");
-const prevBtn = $("#prevBtn");
-const nextBtn = $("#nextBtn");
-const paletteEl = $("#palette");
+function initElements() {
+  // Check if HTML file is updated
+  const htmlMarker = document.querySelector('#htmlUpdateMarker');
+  console.log("HTML Update Marker:", htmlMarker ? htmlMarker.textContent : "NOT FOUND");
+  
+  // Debug: Test basic selector
+  console.log("Testing selectors:");
+  console.log("document.querySelector('#menuScreen'):", document.querySelector('#menuScreen'));
+  console.log("All sections:", document.querySelectorAll('section'));
+  console.log("Document body HTML length:", document.body.innerHTML.length);
+  
+  paintCanvas = $("#paintLayer");
+  paintCtx = paintCanvas?.getContext("2d");
+  lineArtCanvas = $("#lineArtLayer");
+  lineArtCtx = lineArtCanvas?.getContext("2d");
+  wrap = $("#canvasWrap");
+
+  // Screen elements
+  menuScreen = $("#menuScreen");
+  thumbScreen = $("#thumbScreen");
+  paintScreen = $("#paintScreen");
+  
+  // More debug info
+  console.log("Raw selectors:", {
+    menuScreen: document.querySelector("#menuScreen"),
+    thumbScreen: document.querySelector("#thumbScreen"), 
+    paintScreen: document.querySelector("#paintScreen")
+  });
+
+  // Menu elements
+  categoryBtns = $$(".category-btn");
+
+  // Thumbnail elements
+  backToMenu = $("#backToMenu");
+  thumbTitle = $("#thumbTitle");
+  thumbGrid = $("#thumbGrid");
+
+  // Paint elements
+  backToThumbs = $("#backToThumbs");
+  paintTitle = $("#paintTitle");
+  prevPaintBtn = $("#prevPaintBtn");
+  nextPaintBtn = $("#nextPaintBtn");
+
+  colorPicker = $("#colorPicker");
+  brushSize = $("#brushSize");
+  brushBtn = $("#brushBtn");
+  eraserBtn = $("#eraserBtn");
+  clearBtn = $("#clearBtn");
+  paletteEl = $("#palette");
+}
+
+// Screen management
+function showScreen(screenName) {
+  // Hide all screens
+  if (menuScreen) menuScreen.style.display = 'none';
+  if (thumbScreen) thumbScreen.style.display = 'none';
+  if (paintScreen) paintScreen.style.display = 'none';
+  
+  state.currentScreen = screenName;
+  
+  switch(screenName) {
+    case 'menu':
+      if (menuScreen) menuScreen.style.display = 'flex';
+      break;
+    case 'thumbs':
+      if (thumbScreen) thumbScreen.style.display = 'flex';
+      break;
+    case 'paint':
+      if (paintScreen) paintScreen.style.display = 'flex';
+      break;
+  }
+}
+
+// Category titles
+const categoryTitles = {
+  fairy: '妖精',
+  car: '車', 
+  ninja: '忍者'
+};
 
 // Simple image loading
 async function resolveImage(url) {
@@ -67,41 +137,41 @@ async function resolveImage(url) {
   }
 }
 
-// Build thumbnail grid
+// Build thumbnail grid for current category
 async function renderThumbs() {
   thumbGrid.innerHTML = "";
+  thumbTitle.textContent = `${categoryTitles[state.category]}のぬりえ`;
+  
   const list = MANIFEST[state.category];
 
   list.forEach((url, i) => {
     const item = document.createElement("button");
-    item.className = "thumb" + (i === state.index ? " active" : "");
-    item.setAttribute("role", "listitem");
-    item.title = `${state.category} ${i + 1}`;
+    item.className = "thumb";
+    item.title = `${categoryTitles[state.category]} ${i + 1}`;
     const img = document.createElement("img");
     img.src = url;
-    img.alt = `${state.category} ${i + 1}`;
+    img.alt = `${categoryTitles[state.category]} ${i + 1}`;
     item.appendChild(img);
     item.addEventListener("click", async () => {
-      await loadPage(state.category, i);
-      openDrawer(false);
+      state.index = i;
+      await loadPaintScreen();
     });
     thumbGrid.appendChild(item);
   });
+}
+
+// Load paint screen with current image
+async function loadPaintScreen() {
+  await loadPage(state.category, state.index);
+  paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
+  updatePaintNavButtons();
+  showScreen('paint');
 }
 
 // Load current page (line art + restore paint if any)
 async function loadPage(category, index) {
   state.category = category;
   state.index = index;
-  // Update tab UI
-  $$(".tab").forEach((t) => {
-    const active = t.dataset.category === category;
-    t.classList.toggle("active", active);
-    t.setAttribute("aria-selected", String(active));
-  });
-
-  // Thumb highlight
-  $$(".thumb").forEach((el, i) => el.classList.toggle("active", i === index));
 
   const url = MANIFEST[category][index];
   await resolveImage(url);
@@ -132,8 +202,29 @@ async function loadPage(category, index) {
   if (paint && paint.width === paintCanvas.width && paint.height === paintCanvas.height) {
     paintCtx.putImageData(paint, 0, 0);
   }
+}
 
-  updateNavButtons();
+function updatePaintNavButtons() {
+  const count = MANIFEST[state.category].length;
+  prevPaintBtn.disabled = state.index <= 0;
+  nextPaintBtn.disabled = state.index >= count - 1;
+}
+
+async function prevPaint() {
+  if (state.index <= 0) return;
+  state.index--;
+  await loadPage(state.category, state.index);
+  paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
+  updatePaintNavButtons();
+}
+
+async function nextPaint() {
+  const count = MANIFEST[state.category].length;
+  if (state.index >= count - 1) return;
+  state.index++;
+  await loadPage(state.category, state.index);
+  paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
+  updatePaintNavButtons();
 }
 
 function fitToWrap(img) {
@@ -237,14 +328,15 @@ function handlePointerUp(e) {
   endDraw();
 
   // Detect horizontal flick when minimal drawing occurred (short stroke or quick swipe)
-  if (gesture) {
+  // Only in paint screen
+  if (gesture && state.currentScreen === 'paint') {
     const dx = e.clientX - gesture.startX;
     const dy = e.clientY - gesture.startY;
     const dt = Date.now() - gesture.t;
     const absDx = Math.abs(dx), absDy = Math.abs(dy);
     const isFlick = dt < 500 && absDx > 80 && absDy < 50;
     if (isFlick && !wasDrawing) {
-      if (dx < 0) nextPage(); else prevPage();
+      if (dx < 0) nextPaint(); else prevPaint();
     }
   }
   gesture = null;
@@ -267,25 +359,6 @@ function bindCanvasEvents() {
   ["touchstart","touchmove","touchend"].forEach(type => paintCanvas.addEventListener(type, preventDefault, { passive: false }));
 }
 
-function openDrawer(open) {
-  thumbDrawer.setAttribute("aria-hidden", String(!open));
-}
-
-function updateNavButtons() {
-  const count = MANIFEST[state.category].length;
-  prevBtn.disabled = state.index <= 0;
-  nextBtn.disabled = state.index >= count - 1;
-}
-
-async function prevPage() {
-  if (state.index <= 0) return;
-  await loadPage(state.category, state.index - 1);
-}
-async function nextPage() {
-  const count = MANIFEST[state.category].length;
-  if (state.index >= count - 1) return;
-  await loadPage(state.category, state.index + 1);
-}
 
 // ---------- Color palette ----------
 const PALETTE = [
@@ -341,41 +414,59 @@ function selectColor(hex, fromPalette = false) {
 
 // UI bindings
 function bindUI() {
-  // Tabs
-  $$(".tab").forEach((btn) => btn.addEventListener("click", async () => {
-    const cat = btn.dataset.category;
-    if (state.category !== cat) {
-      await renderThumbs();
-      await loadPage(cat, 0);
-    }
-  }));
-
-  // Tools
-  brushBtn.addEventListener("click", () => setTool("brush"));
-  eraserBtn.addEventListener("click", () => setTool("eraser"));
-  colorPicker.addEventListener("input", (e) => { selectColor(e.target.value, false); });
-  brushSize.addEventListener("input", (e) => state.size = Number(e.target.value));
-  clearBtn.addEventListener("click", () => {
-    paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
-    // clear stored paint for this page
-    const key = lineArtCanvas.dataset.resolvedUrl;
-    if (key) state.paints.delete(key);
+  // Category buttons (menu screen)
+  categoryBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.category = btn.dataset.category;
+      renderThumbs();
+      showScreen('thumbs');
+    });
   });
 
-  // Drawer
-  thumbToggle.addEventListener("click", async () => {
-    const isOpen = thumbDrawer.getAttribute("aria-hidden") === "false";
-    if (!isOpen) await renderThumbs();
-    openDrawer(!isOpen);
-  });
-  drawerClose.addEventListener("click", () => openDrawer(false));
+  // Back buttons
+  if (backToMenu) {
+    backToMenu.addEventListener("click", () => showScreen('menu'));
+  }
+  if (backToThumbs) {
+    backToThumbs.addEventListener("click", () => {
+      renderThumbs();
+      showScreen('thumbs');
+    });
+  }
 
-  // Nav arrows
-  prevBtn.addEventListener("click", prevPage);
-  nextBtn.addEventListener("click", nextPage);
+  // Paint navigation
+  if (prevPaintBtn) {
+    prevPaintBtn.addEventListener("click", prevPaint);
+  }
+  if (nextPaintBtn) {
+    nextPaintBtn.addEventListener("click", nextPaint);
+  }
 
-  // Resize handling to keep alignment
+  // Tools (only active in paint screen)
+  if (brushBtn) {
+    brushBtn.addEventListener("click", () => setTool("brush"));
+  }
+  if (eraserBtn) {
+    eraserBtn.addEventListener("click", () => setTool("eraser"));
+  }
+  if (colorPicker) {
+    colorPicker.addEventListener("input", (e) => { selectColor(e.target.value, false); });
+  }
+  if (brushSize) {
+    brushSize.addEventListener("input", (e) => state.size = Number(e.target.value));
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+      // clear stored paint for this page
+      const key = lineArtCanvas.dataset.resolvedUrl;
+      if (key) state.paints.delete(key);
+    });
+  }
+
+  // Resize handling to keep alignment (only in paint screen)
   window.addEventListener("resize", () => {
+    if (state.currentScreen !== 'paint') return;
     const key = lineArtCanvas.dataset.resolvedUrl;
     // Preserve current paint and re-fit
     if (key) saveCurrentPaint(key);
@@ -394,19 +485,43 @@ function bindUI() {
 }
 
 async function init() {
+  // Initialize DOM elements first
+  initElements();
+  
+  // Debug: Check if screen elements exist
+  console.log("Screen elements:", {
+    menuScreen: !!menuScreen,
+    thumbScreen: !!thumbScreen, 
+    paintScreen: !!paintScreen
+  });
+  
   bindCanvasEvents();
   bindUI();
   renderPalette();
   updatePaletteSelection();
   setTool("brush");
-  await renderThumbs();
-  await loadPage(state.category, state.index);
+  
+  // Start with menu screen
+  showScreen('menu');
 }
 
-init().catch((e) => {
-  console.error('Initialization error:', e);
-  console.error('Error type:', typeof e);
-  console.error('Error message:', e.message);
-  console.error('Error stack:', e.stack);
-  alert("初期化に失敗しました: " + (e.message || e.toString()));
-});
+// Wait for DOM to be fully loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    init().catch((e) => {
+      console.error('Initialization error:', e);
+      console.error('Error type:', typeof e);
+      console.error('Error message:', e.message);
+      console.error('Error stack:', e.stack);
+      alert("初期化に失敗しました: " + (e.message || e.toString()));
+    });
+  });
+} else {
+  init().catch((e) => {
+    console.error('Initialization error:', e);
+    console.error('Error type:', typeof e);
+    console.error('Error message:', e.message);
+    console.error('Error stack:', e.stack);
+    alert("初期化に失敗しました: " + (e.message || e.toString()));
+  });
+}

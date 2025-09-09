@@ -37,7 +37,148 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hira
 .thumb.active { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
 .thumb img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
+/* Screen management */
+.screen { min-height: calc(100vh - 64px); }
+.menu-screen, .thumb-screen { display: flex; align-items: center; justify-content: center; padding: 20px; }
+.paint-screen { display: flex; flex-direction: column; }
+
+/* Menu screen */
+.menu-container { text-align: center; max-width: 600px; width: 100%; }
+.menu-title { font-size: 28px; color: #333; margin-bottom: 40px; }
+.category-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
+.category-btn { 
+  border: 2px solid #e5e7eb; 
+  background: #fff; 
+  padding: 30px 20px; 
+  border-radius: 20px; 
+  cursor: pointer; 
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.category-btn:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); border-color: #3b82f6; }
+.category-icon { font-size: 48px; margin-bottom: 10px; }
+.category-btn span { display: block; font-size: 18px; font-weight: 600; color: #374151; }
+
+/* Thumbnail screen */
+.thumb-container { max-width: 1000px; width: 100%; }
+.thumb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+.thumb-title { font-size: 24px; color: #333; margin: 0; }
+.back-btn { 
+  border: 1px solid #d6d7e0; 
+  background: #fff; 
+  padding: 10px 16px; 
+  border-radius: 12px; 
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+.back-btn:hover { background: #f9fafb; }
+.thumb-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+  gap: 20px; 
+}
+.thumb { 
+  display: block; 
+  border: 3px solid #e5e7eb; 
+  border-radius: 16px; 
+  padding: 8px; 
+  background: #fff; 
+  cursor: pointer; 
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.thumb:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); border-color: #3b82f6; }
+.thumb img { display: block; width: 100%; height: 200px; object-fit: contain; border-radius: 8px; }
+
+/* Paint screen */
+.paint-header { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 15px 20px; 
+  background: #fff; 
+  border-bottom: 1px solid #e5e7eb;
+}
+.paint-nav { display: flex; align-items: center; gap: 15px; }
+.paint-nav button { 
+  border: 1px solid #d6d7e0; 
+  background: #fff; 
+  padding: 8px 12px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+}
+.paint-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+#paintTitle { font-size: 16px; font-weight: 600; color: #374151; }
+
+/* Paint tools */
+.paint-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+.paint-tools .tool { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 6px; 
+  font-size: 13px; 
+  color: #444; 
+}
+.paint-tools .palette { 
+  display: inline-flex; 
+  gap: 6px; 
+  align-items: center; 
+}
+.paint-tools .swatch { 
+  width: 22px; 
+  height: 22px; 
+  border-radius: 999px; 
+  border: 2px solid #e5e7eb; 
+  cursor: pointer; 
+  display: inline-block; 
+  padding: 0; 
+  background: transparent; 
+}
+.paint-tools .swatch[aria-pressed="true"] { 
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.25); 
+  border-color: #3b82f6; 
+}
+.paint-tools .buttons { 
+  display: inline-flex; 
+  gap: 6px; 
+}
+.paint-tools .buttons button { 
+  border: 1px solid #d6d7e0; 
+  background: #fff; 
+  padding: 6px 10px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+}
+.paint-tools .buttons .primary[aria-pressed="true"], 
+.paint-tools .buttons button[aria-pressed="true"] { 
+  background: #10b981; 
+  border-color: #10b981; 
+  color: #fff; 
+}
+
+/* Canvas adjustments for paint screen */
+.paint-screen .canvas-wrap { 
+  flex: 1; 
+  margin: 20px; 
+  max-height: calc(100vh - 180px);
+}
+
 @media (max-width: 680px) {
   .tools { flex-wrap: wrap; }
   .canvas-wrap { height: min(60vh, 640px); }
+  .category-buttons { grid-template-columns: 1fr; }
+  .thumb-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+  .thumb img { height: 150px; }
+  .menu-title { font-size: 24px; }
+  .paint-header { padding: 10px 15px; }
+  .paint-screen .canvas-wrap { margin: 15px; }
 }

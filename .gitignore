@@ -1,1 +1,22 @@
+# macOS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules (if added later)
+node_modules/
+
+# Logs
+*.log
+
+# Editor files
+.vscode/settings.json
+.idea/
+
+# Temporary files
+*.tmp
+*.temp

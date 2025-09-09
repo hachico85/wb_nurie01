@@ -14,52 +14,75 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <h1 class="app-title">ぬりえ</h1>
-      <nav class="tabs" role="tablist" aria-label="カテゴリ">
-        <button class="tab active" data-category="fairy" aria-selected="true">妖精</button>
-        <button class="tab" data-category="car" aria-selected="false">車</button>
-        <button class="tab" data-category="ninja" aria-selected="false">忍者</button>
-      </nav>
-      <div class="spacer"></div>
-      <div class="tools">
-        <label class="tool">
-          <span>色</span>
-          <input id="colorPicker" type="color" value="#ff6b6b" />
-        </label>
-        <div id="palette" class="palette" role="group" aria-label="基本色"></div>
-        <label class="tool">
-          <span>太さ</span>
-          <input id="brushSize" type="range" min="2" max="60" value="22" />
-        </label>
-        <div class="buttons">
-          <button id="brushBtn" class="primary" aria-pressed="true">筆</button>
-          <button id="eraserBtn" aria-pressed="false">消しゴム</button>
-          <button id="clearBtn">クリア</button>
-          <button id="thumbToggle" title="サムネイル">一覧</button>
-        </div>
-      </div>
-    </header>
-
+    <!-- TEST: Updated HTML file marker -->
+    <div id="htmlUpdateMarker" style="display: none;">HTML_UPDATED_V2</div>
+    
     <main class="main">
-      <section class="stage">
-        <div id="canvasWrap" class="canvas-wrap">
-          <canvas id="lineArtLayer" class="canvas-layer" aria-label="線画レイヤー"></canvas>
-          <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
-          <div class="nav-arrows">
-            <button id="prevBtn" aria-label="前へ" class="nav-btn">◀</button>
-            <button id="nextBtn" aria-label="次へ" class="nav-btn">▶</button>
+      <!-- メニュー画面 -->
+      <section id="menuScreen" class="screen menu-screen">
+        <div class="menu-container">
+          <h1 class="menu-title">ぬりえを選んでね</h1>
+          <div class="category-buttons">
+            <button class="category-btn" data-category="fairy">
+              <div class="category-icon">🧚‍♀️</div>
+              <span>妖精</span>
+            </button>
+            <button class="category-btn" data-category="car">
+              <div class="category-icon">🚗</div>
+              <span>車</span>
+            </button>
+            <button class="category-btn" data-category="ninja">
+              <div class="category-icon">🥷</div>
+              <span>忍者</span>
+            </button>
           </div>
         </div>
       </section>
 
-      <aside id="thumbDrawer" class="drawer" aria-hidden="true">
-        <div class="drawer-header">
-          <strong>サムネイル</strong>
-          <button id="drawerClose" aria-label="閉じる">×</button>
+      <!-- サムネイル選択画面 -->
+      <section id="thumbScreen" class="screen thumb-screen" style="display: none;">
+        <div class="thumb-container">
+          <div class="thumb-header">
+            <button id="backToMenu" class="back-btn">← メニューに戻る</button>
+            <h2 id="thumbTitle" class="thumb-title"></h2>
+          </div>
+          <div id="thumbGrid" class="thumb-grid"></div>
         </div>
-        <div id="thumbGrid" class="thumb-grid" role="list"></div>
-      </aside>
+      </section>
+
+      <!-- 塗り絵画面 -->
+      <section id="paintScreen" class="screen paint-screen" style="display: none;">
+        <div class="paint-header">
+          <button id="backToThumbs" class="back-btn">← 一覧に戻る</button>
+          <div class="paint-nav">
+            <button id="prevPaintBtn" aria-label="前の塗り絵">◀</button>
+            <span id="paintTitle"></span>
+            <button id="nextPaintBtn" aria-label="次の塗り絵">▶</button>
+          </div>
+        </div>
+        
+        <div class="paint-tools">
+          <label class="tool">
+            <span>色</span>
+            <input id="colorPicker" type="color" value="#ff6b6b" />
+          </label>
+          <div id="palette" class="palette" role="group" aria-label="基本色"></div>
+          <label class="tool">
+            <span>太さ</span>
+            <input id="brushSize" type="range" min="2" max="60" value="22" />
+          </label>
+          <div class="buttons">
+            <button id="brushBtn" class="primary" aria-pressed="true">筆</button>
+            <button id="eraserBtn" aria-pressed="false">消しゴム</button>
+            <button id="clearBtn">クリア</button>
+          </div>
+        </div>
+        
+        <div id="canvasWrap" class="canvas-wrap">
+          <canvas id="lineArtLayer" class="canvas-layer" aria-label="線画レイヤー"></canvas>
+          <canvas id="paintLayer" class="canvas-layer" aria-label="塗りレイヤー"></canvas>
+        </div>
+      </section>
     </main>
 
     <script src="app.js" type="module"></script>
