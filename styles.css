@@ -178,6 +178,64 @@ body { font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI
   max-height: calc(100vh - 180px);
 }
 
+/* Loading animations */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f4f6;
+  border-left: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.thumb-loading {
+  position: relative;
+  min-height: 200px;
+}
+
+.thumb-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+  border-radius: 16px;
+  height: 200px;
+  border: 3px solid #e5e7eb;
+  padding: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+@keyframes loading-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @media (max-width: 680px) {
   .tools { flex-wrap: wrap; }
   .canvas-wrap { height: min(60vh, 640px); }

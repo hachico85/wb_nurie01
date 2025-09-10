@@ -23,6 +23,7 @@ let menuScreen, thumbScreen, paintScreen;
 let backToMenu, thumbTitle, thumbGrid;
 let backToThumbs, paintTitle, prevPaintBtn, nextPaintBtn;
 let colorPicker, brushSize, brushBtn, eraserBtn, clearBtn, paletteEl;
+let paintLoading;
 
 function initElements() {
   paintCanvas = $("#paintLayer");
@@ -55,6 +56,7 @@ function initElements() {
   eraserBtn = $("#eraserBtn");
   clearBtn = $("#clearBtn");
   paletteEl = $("#palette");
+  paintLoading = $("#paintLoading");
 }
 
 // Screen management
@@ -205,8 +207,26 @@ async function resolveImage(url) {
   }
 }
 
+// Show thumbnail loading skeletons
+function showThumbLoading() {
+  thumbGrid.innerHTML = "";
+  
+  // Show skeleton loading items
+  for (let i = 0; i < 3; i++) {
+    const skeleton = document.createElement("div");
+    skeleton.className = "thumb thumb-skeleton";
+    thumbGrid.appendChild(skeleton);
+  }
+}
+
 // Build thumbnail grid for current category
 async function renderThumbs() {
+  // Show loading skeletons first
+  showThumbLoading();
+  
+  // Small delay to show loading state
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
   thumbGrid.innerHTML = "";
   
   // Use displayName from categories config with icon
@@ -219,32 +239,67 @@ async function renderThumbs() {
   
   const list = MANIFEST[state.category];
 
-  list.forEach((url, i) => {
+  // Load thumbnails with loading states
+  const promises = list.map(async (url, i) => {
     const item = document.createElement("button");
     item.className = "thumb";
     item.title = `${categoryTitles[state.category]} ${i + 1}`;
+    
+    // Create img element and wait for it to load
     const img = document.createElement("img");
-    img.src = url;
     img.alt = `${categoryTitles[state.category]} ${i + 1}`;
+    
+    // Add loading state to thumbnail
     item.appendChild(img);
+    
     item.addEventListener("click", async () => {
       state.index = i;
       await loadPaintScreen();
     });
-    thumbGrid.appendChild(item);
+    
+    // Load image asynchronously
+    try {
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = url;
+      });
+    } catch (error) {
+      console.warn(`Failed to load thumbnail: ${url}`, error);
+    }
+    
+    return item;
   });
+
+  // Wait for all thumbnails to load and add them
+  const loadedItems = await Promise.all(promises);
+  thumbGrid.innerHTML = ""; // Clear skeletons
+  loadedItems.forEach(item => thumbGrid.appendChild(item));
+}
+
+// Show loading indicator
+function showPaintLoading(show) {
+  if (paintLoading) {
+    paintLoading.style.display = show ? 'flex' : 'none';
+  }
 }
 
 // Load paint screen with current image
 async function loadPaintScreen() {
   showScreen('paint');
+  showPaintLoading(true);
   
   // Wait for paint screen to be visible before loading image
   await new Promise(resolve => setTimeout(resolve, 50));
   
-  await loadPage(state.category, state.index);
-  paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
-  updatePaintNavButtons();
+  try {
+    await loadPage(state.category, state.index);
+    paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
+    updatePaintNavButtons();
+  } finally {
+    // Ensure loading is hidden even if there's an error
+    showPaintLoading(false);
+  }
 }
 
 // Load current page (line art + restore paint if any)
@@ -291,19 +346,29 @@ function updatePaintNavButtons() {
 
 async function prevPaint() {
   if (state.index <= 0) return;
-  state.index--;
-  await loadPage(state.category, state.index);
-  paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
-  updatePaintNavButtons();
+  showPaintLoading(true);
+  try {
+    state.index--;
+    await loadPage(state.category, state.index);
+    paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
+    updatePaintNavButtons();
+  } finally {
+    showPaintLoading(false);
+  }
 }
 
 async function nextPaint() {
   const count = MANIFEST[state.category].length;
   if (state.index >= count - 1) return;
-  state.index++;
-  await loadPage(state.category, state.index);
-  paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
-  updatePaintNavButtons();
+  showPaintLoading(true);
+  try {
+    state.index++;
+    await loadPage(state.category, state.index);
+    paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
+    updatePaintNavButtons();
+  } finally {
+    showPaintLoading(false);
+  }
 }
 
 function fitToWrap(img) {
