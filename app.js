@@ -1,23 +1,7 @@
-// Simple manifest with graceful fallbacks so it works out-of-the-box.
-// Primary paths assume: img/animals/1-5.png, img/vehicles/1-5.png
-// Fallbacks map to sample images found under docs/img/transparent_1-10.png
-const MANIFEST = {
-  fairy: [
-    "img/01_fairy/01.png",
-    "img/01_fairy/02.png",
-    "img/01_fairy/03.png",
-  ],
-  car: [
-    "img/02_car/01.png",
-    "img/02_car/02.png",
-    "img/02_car/03.png",
-  ],
-  ninja: [
-    "img/03_ninja/01.png",
-    "img/03_ninja/02.png",
-    "img/03_ninja/03.png",
-  ],
-};
+// Dynamic category configuration - loaded from categories.json
+let CATEGORIES = [];
+let MANIFEST = {};
+let categoryTitles = {};
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -36,7 +20,6 @@ const state = {
 // Initialize elements after DOM is loaded
 let paintCanvas, paintCtx, lineArtCanvas, lineArtCtx, wrap;
 let menuScreen, thumbScreen, paintScreen;
-let categoryBtns;
 let backToMenu, thumbTitle, thumbGrid;
 let backToThumbs, paintTitle, prevPaintBtn, nextPaintBtn;
 let colorPicker, brushSize, brushBtn, eraserBtn, clearBtn, paletteEl;
@@ -53,9 +36,8 @@ function initElements() {
   thumbScreen = $("#thumbScreen");
   paintScreen = $("#paintScreen");
 
-  // Menu elements
-  categoryBtns = $$(".category-btn");
-
+  // Menu elements are dynamically generated
+  
   // Thumbnail elements
   backToMenu = $("#backToMenu");
   thumbTitle = $("#thumbTitle");
@@ -97,12 +79,115 @@ function showScreen(screenName) {
   }
 }
 
-// Category titles
-const categoryTitles = {
-  fairy: '妖精',
-  car: '車', 
-  ninja: '忍者'
-};
+// Generate category menu buttons dynamically
+function renderCategoryMenu() {
+  const categoryButtons = document.querySelector('#categoryButtons');
+  if (!categoryButtons) {
+    console.error('Category buttons container not found');
+    return;
+  }
+  
+  categoryButtons.innerHTML = '';
+  
+  CATEGORIES.forEach(category => {
+    const button = document.createElement('button');
+    button.className = 'category-btn';
+    button.dataset.category = category.id;
+    button.title = category.description;
+    
+    button.innerHTML = `
+      <div class="category-icon">${category.icon}</div>
+      <span>${category.name}</span>
+    `;
+    
+    // Add click event listener
+    button.addEventListener('click', () => {
+      state.category = category.id;
+      renderThumbs();
+      showScreen('thumbs');
+    });
+    
+    categoryButtons.appendChild(button);
+  });
+  
+  console.log('Category menu generated:', CATEGORIES.length, 'buttons');
+}
+
+// Load category configuration from JSON file
+async function loadCategories() {
+  try {
+    console.log('Loading categories from categories.json...');
+    const response = await fetch('categories.json');
+    
+    if (!response.ok) {
+      throw new Error(`Failed to load categories: ${response.status}`);
+    }
+    
+    const config = await response.json();
+    CATEGORIES = config.categories;
+    
+    // Convert to existing format for compatibility
+    MANIFEST = {};
+    categoryTitles = {};
+    
+    CATEGORIES.forEach(category => {
+      // Build image paths
+      MANIFEST[category.id] = category.images.map(img => `img/${category.folder}/${img}`);
+      // Set category titles
+      categoryTitles[category.id] = category.name;
+    });
+    
+    console.log('Categories loaded successfully:', CATEGORIES.length, 'categories');
+    console.log('MANIFEST:', MANIFEST);
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to load categories:', error);
+    
+    // Fallback to hardcoded categories if JSON fails
+    console.log('Using fallback categories...');
+    CATEGORIES = [
+      {
+        id: "fairy",
+        name: "妖精", 
+        displayName: "妖精のぬりえ",
+        icon: "🧚‍♀️",
+        folder: "01_fairy",
+        images: ["01.png", "02.png", "03.png"],
+        description: "かわいい妖精たち"
+      },
+      {
+        id: "car",
+        name: "車",
+        displayName: "車のぬりえ", 
+        icon: "🚗",
+        folder: "02_car",
+        images: ["01.png", "02.png", "03.png"],
+        description: "かっこいい車"
+      },
+      {
+        id: "ninja",
+        name: "忍者",
+        displayName: "忍者のぬりえ",
+        icon: "🥷", 
+        folder: "03_ninja",
+        images: ["01.png", "02.png", "03.png"],
+        description: "強い忍者"
+      }
+    ];
+    
+    // Convert fallback to existing format
+    MANIFEST = {};
+    categoryTitles = {};
+    
+    CATEGORIES.forEach(category => {
+      MANIFEST[category.id] = category.images.map(img => `img/${category.folder}/${img}`);
+      categoryTitles[category.id] = category.name;
+    });
+    
+    return false;
+  }
+}
 
 // Simple image loading
 async function resolveImage(url) {
@@ -123,7 +208,14 @@ async function resolveImage(url) {
 // Build thumbnail grid for current category
 async function renderThumbs() {
   thumbGrid.innerHTML = "";
-  thumbTitle.textContent = `${categoryTitles[state.category]}のぬりえ`;
+  
+  // Use displayName from categories config with icon
+  const category = CATEGORIES.find(cat => cat.id === state.category);
+  if (category) {
+    thumbTitle.innerHTML = `${category.icon} ${category.displayName}`;
+  } else {
+    thumbTitle.textContent = `${categoryTitles[state.category]}のぬりえ`;
+  }
   
   const list = MANIFEST[state.category];
 
@@ -449,15 +541,9 @@ function selectColor(hex, fromPalette = false) {
 
 // UI bindings
 function bindUI() {
-  // Category buttons (menu screen)
-  categoryBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.category = btn.dataset.category;
-      renderThumbs();
-      showScreen('thumbs');
-    });
-  });
-
+  // Category buttons are now dynamically generated in renderCategoryMenu()
+  // No need to bind static category buttons
+  
   // Back buttons
   if (backToMenu) {
     backToMenu.addEventListener("click", () => showScreen('menu'));
@@ -522,6 +608,12 @@ function bindUI() {
 async function init() {
   // Initialize DOM elements first
   initElements();
+  
+  // Load category configuration
+  await loadCategories();
+  
+  // Generate category menu from configuration
+  renderCategoryMenu();
   
   bindCanvasEvents();
   bindUI();

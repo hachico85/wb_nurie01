@@ -1,0 +1,43 @@
+{
+  "categories": [
+    {
+      "id": "fairy",
+      "name": "ファンタジー",
+      "displayName": "ファンタジー",
+      "icon": "🧚‍♀️",
+      "folder": "01_fairy",
+      "images": [
+        "01.png",
+        "02.png",
+        "03.png"
+      ],
+      "description": "かわいい妖精たち"
+    },
+    {
+      "id": "car",
+      "name": "のりもの",
+      "displayName": "のりもの",
+      "icon": "🚗",
+      "folder": "02_car",
+      "images": [
+        "01.png",
+        "02.png",
+        "03.png"
+      ],
+      "description": "かっこいい車"
+    },
+    {
+      "id": "ninja",
+      "name": "にんじゃ",
+      "displayName": "にんじゃ",
+      "icon": "🥷",
+      "folder": "03_ninja",
+      "images": [
+        "01.png",
+        "02.png",
+        "03.png"
+      ],
+      "description": "強い忍者"
+    }
+  ]
+}
