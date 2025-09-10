@@ -46,6 +46,55 @@ img/
 
 Update `MANIFEST` object in `app.js` when adding/removing images. The app saves paint state per image URL for persistence across navigation.
 
+## Dynamic Category Configuration (Implementation Plan)
+
+**Configuration File Structure:**
+The app should support dynamic category management through a JSON configuration file:
+
+```json
+// categories.json
+{
+  "categories": [
+    {
+      "id": "fairy",
+      "name": "妖精",
+      "displayName": "妖精のぬりえ", 
+      "icon": "🧚‍♀️",
+      "folder": "01_fairy",
+      "images": ["01.png", "02.png", "03.png"],
+      "description": "かわいい妖精たち"
+    },
+    {
+      "id": "car",
+      "name": "車", 
+      "displayName": "車のぬりえ",
+      "icon": "🚗",
+      "folder": "02_car",
+      "images": ["01.png", "02.png", "03.png"],
+      "description": "かっこいい車"
+    }
+  ]
+}
+```
+
+**Implementation Requirements:**
+1. **Dynamic Menu Generation**: Category buttons should be generated from the JSON configuration
+2. **Configuration Loading**: Add `loadCategories()` function to fetch and parse categories.json
+3. **Legacy Compatibility**: Convert JSON config to existing `MANIFEST` and `categoryTitles` format
+4. **Title Management**: Use `displayName` for thumbnail screen titles instead of hardcoded strings
+5. **Extensibility**: Support additional metadata (description, difficulty, target age, etc.)
+
+**Benefits:**
+- New categories can be added by editing JSON only
+- Multi-language support through displayName variations
+- Centralized management of UI text and icons
+- Easy maintenance for non-technical users
+
+**File Locations:**
+- Configuration: `/categories.json`
+- Assets: `/img/{folder}/{images}`
+- Icons: Emoji strings in configuration
+
 ## Key Implementation Details
 
 **Canvas Event Handling:**
