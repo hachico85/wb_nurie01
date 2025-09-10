@@ -42,16 +42,6 @@ let backToThumbs, paintTitle, prevPaintBtn, nextPaintBtn;
 let colorPicker, brushSize, brushBtn, eraserBtn, clearBtn, paletteEl;
 
 function initElements() {
-  // Check if HTML file is updated
-  const htmlMarker = document.querySelector('#htmlUpdateMarker');
-  console.log("HTML Update Marker:", htmlMarker ? htmlMarker.textContent : "NOT FOUND");
-  
-  // Debug: Test basic selector
-  console.log("Testing selectors:");
-  console.log("document.querySelector('#menuScreen'):", document.querySelector('#menuScreen'));
-  console.log("All sections:", document.querySelectorAll('section'));
-  console.log("Document body HTML length:", document.body.innerHTML.length);
-  
   paintCanvas = $("#paintLayer");
   paintCtx = paintCanvas?.getContext("2d");
   lineArtCanvas = $("#lineArtLayer");
@@ -62,13 +52,6 @@ function initElements() {
   menuScreen = $("#menuScreen");
   thumbScreen = $("#thumbScreen");
   paintScreen = $("#paintScreen");
-  
-  // More debug info
-  console.log("Raw selectors:", {
-    menuScreen: document.querySelector("#menuScreen"),
-    thumbScreen: document.querySelector("#thumbScreen"), 
-    paintScreen: document.querySelector("#paintScreen")
-  });
 
   // Menu elements
   categoryBtns = $$(".category-btn");
@@ -162,10 +145,14 @@ async function renderThumbs() {
 
 // Load paint screen with current image
 async function loadPaintScreen() {
+  showScreen('paint');
+  
+  // Wait for paint screen to be visible before loading image
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
   await loadPage(state.category, state.index);
   paintTitle.textContent = `${categoryTitles[state.category]} ${state.index + 1}`;
   updatePaintNavButtons();
-  showScreen('paint');
 }
 
 // Load current page (line art + restore paint if any)
@@ -231,6 +218,13 @@ function fitToWrap(img) {
   // Compute size to fit image into wrap while preserving aspect
   const maxW = wrap.clientWidth;
   const maxH = wrap.clientHeight;
+  
+  if (maxW === 0 || maxH === 0) {
+    // Retry after a short delay if wrap is not visible yet
+    setTimeout(() => fitToWrap(img), 100);
+    return;
+  }
+  
   const iw = img.naturalWidth || 1024;
   const ih = img.naturalHeight || 768;
   const scale = Math.min(maxW / iw, maxH / ih);
@@ -280,9 +274,30 @@ function setTool(tool) {
 
 function getLocalPoint(evt) {
   const rect = paintCanvas.getBoundingClientRect();
+  
+  // Handle both mouse and touch events
+  let clientX, clientY;
+  if (evt.touches && evt.touches.length > 0) {
+    // Touch event
+    clientX = evt.touches[0].clientX;
+    clientY = evt.touches[0].clientY;
+  } else if (evt.changedTouches && evt.changedTouches.length > 0) {
+    // Touch end event
+    clientX = evt.changedTouches[0].clientX;
+    clientY = evt.changedTouches[0].clientY;
+  } else {
+    // Mouse event
+    clientX = evt.clientX;
+    clientY = evt.clientY;
+  }
+  
+  // Convert to canvas coordinates
+  const scaleX = paintCanvas.width / rect.width;
+  const scaleY = paintCanvas.height / rect.height;
+  
   return {
-    x: (evt.clientX - rect.left),
-    y: (evt.clientY - rect.top),
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY,
   };
 }
 
@@ -316,7 +331,18 @@ let gesture = null; // {startX, startY, t}
 function handlePointerDown(e) {
   const pt = getLocalPoint(e);
   beginDraw(pt);
-  gesture = { startX: e.clientX, startY: e.clientY, t: Date.now() };
+  
+  // Handle gesture tracking for both mouse and touch
+  let clientX, clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  
+  gesture = { startX: clientX, startY: clientY, t: Date.now() };
 }
 function handlePointerMove(e) {
   if (!drawing) return;
@@ -330,8 +356,17 @@ function handlePointerUp(e) {
   // Detect horizontal flick when minimal drawing occurred (short stroke or quick swipe)
   // Only in paint screen
   if (gesture && state.currentScreen === 'paint') {
-    const dx = e.clientX - gesture.startX;
-    const dy = e.clientY - gesture.startY;
+    let clientX, clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    
+    const dx = clientX - gesture.startX;
+    const dy = clientY - gesture.startY;
     const dt = Date.now() - gesture.t;
     const absDx = Math.abs(dx), absDy = Math.abs(dy);
     const isFlick = dt < 500 && absDx > 80 && absDy < 50;
@@ -487,13 +522,6 @@ function bindUI() {
 async function init() {
   // Initialize DOM elements first
   initElements();
-  
-  // Debug: Check if screen elements exist
-  console.log("Screen elements:", {
-    menuScreen: !!menuScreen,
-    thumbScreen: !!thumbScreen, 
-    paintScreen: !!paintScreen
-  });
   
   bindCanvasEvents();
   bindUI();
