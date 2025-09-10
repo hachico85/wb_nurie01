@@ -208,27 +208,63 @@ async function resolveImage(url) {
 }
 
 // Show thumbnail loading skeletons
-function showThumbLoading() {
+function showThumbLoading(count) {
   thumbGrid.innerHTML = "";
   
-  // Show skeleton loading items
-  for (let i = 0; i < 3; i++) {
+  // Show skeleton loading items based on actual count
+  for (let i = 0; i < count; i++) {
     const skeleton = document.createElement("div");
     skeleton.className = "thumb thumb-skeleton";
     thumbGrid.appendChild(skeleton);
   }
 }
 
+// Progressive thumbnail loading - create placeholder with loading state
+function createProgressiveThumbnail(url, index, categoryName) {
+  const item = document.createElement("button");
+  item.className = "thumb thumb-loading";
+  item.title = `${categoryName} ${index + 1}`;
+  
+  // Create placeholder with loading animation
+  const placeholder = document.createElement("div");
+  placeholder.className = "thumb-placeholder";
+  item.appendChild(placeholder);
+  
+  // Create actual image element
+  const img = document.createElement("img");
+  img.alt = `${categoryName} ${index + 1}`;
+  img.style.opacity = "0";
+  img.style.transition = "opacity 0.3s ease";
+  
+  // Add click handler
+  item.addEventListener("click", async () => {
+    state.index = index;
+    await loadPaintScreen();
+  });
+  
+  // Load image asynchronously
+  img.onload = () => {
+    // Replace placeholder with actual image
+    placeholder.remove();
+    img.style.opacity = "1";
+    item.classList.remove("thumb-loading");
+    item.appendChild(img);
+  };
+  
+  img.onerror = () => {
+    console.warn(`Failed to load thumbnail: ${url}`);
+    placeholder.innerHTML = '<div class="thumb-error">⚠️</div>';
+    item.classList.remove("thumb-loading");
+  };
+  
+  // Start loading
+  img.src = url;
+  
+  return item;
+}
+
 // Build thumbnail grid for current category
 async function renderThumbs() {
-  // Show loading skeletons first
-  showThumbLoading();
-  
-  // Small delay to show loading state
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
-  thumbGrid.innerHTML = "";
-  
   // Use displayName from categories config with icon
   const category = CATEGORIES.find(cat => cat.id === state.category);
   if (category) {
@@ -238,43 +274,21 @@ async function renderThumbs() {
   }
   
   const list = MANIFEST[state.category];
-
-  // Load thumbnails with loading states
-  const promises = list.map(async (url, i) => {
-    const item = document.createElement("button");
-    item.className = "thumb";
-    item.title = `${categoryTitles[state.category]} ${i + 1}`;
-    
-    // Create img element and wait for it to load
-    const img = document.createElement("img");
-    img.alt = `${categoryTitles[state.category]} ${i + 1}`;
-    
-    // Add loading state to thumbnail
-    item.appendChild(img);
-    
-    item.addEventListener("click", async () => {
-      state.index = i;
-      await loadPaintScreen();
-    });
-    
-    // Load image asynchronously
-    try {
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = url;
-      });
-    } catch (error) {
-      console.warn(`Failed to load thumbnail: ${url}`, error);
-    }
-    
-    return item;
+  
+  // Show loading skeletons first with correct count
+  showThumbLoading(list.length);
+  
+  // Small delay to show loading state
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
+  // Clear skeletons and immediately show progressive thumbnails
+  thumbGrid.innerHTML = "";
+  
+  // Create progressive thumbnails immediately
+  list.forEach((url, i) => {
+    const item = createProgressiveThumbnail(url, i, categoryTitles[state.category]);
+    thumbGrid.appendChild(item);
   });
-
-  // Wait for all thumbnails to load and add them
-  const loadedItems = await Promise.all(promises);
-  thumbGrid.innerHTML = ""; // Clear skeletons
-  loadedItems.forEach(item => thumbGrid.appendChild(item));
 }
 
 // Show loading indicator
