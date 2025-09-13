@@ -38,6 +38,63 @@
         "03.png"
       ],
       "description": "強い忍者"
+    },
+    {
+      "id": "animal",
+      "name": "どうぶつ",
+      "displayName": "どうぶつ",
+      "icon": "🐶",
+      "folder": "04_animal",
+      "images": [
+        "10.png",
+        "11.png",
+        "12.png",
+        "13.png",
+        "14.png"
+      ],
+      "description": "かわいい動物たち"
+    },
+    {
+      "id": "sea",
+      "name": "うみ",
+      "displayName": "うみ",
+      "icon": "🐠",
+      "folder": "05_sea",
+      "images": [
+        "15.png",
+        "16.png",
+        "17.png",
+        "18.png"
+      ],
+      "description": "きれいな海の仲間たち"
+    },
+    {
+      "id": "sweets",
+      "name": "おかし",
+      "displayName": "おかし",
+      "icon": "🍰",
+      "folder": "06_sweets",
+      "images": [
+        "19.png",
+        "20.png",
+        "21.png"
+      ],
+      "description": "おいしいお菓子"
+    },
+    {
+      "id": "vegetable",
+      "name": "やさい",
+      "displayName": "やさい",
+      "icon": "🥬",
+      "folder": "07_vagetable",
+      "images": [
+        "22.png",
+        "23.png",
+        "24.png",
+        "25.png",
+        "26.png"
+      ],
+      "description": "元気な野菜たち"
     }
   ]
 }
